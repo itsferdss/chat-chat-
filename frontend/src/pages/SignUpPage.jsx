@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useAuthStore } from "../store/useAuthStore"
 import { MessageSquare, User, Mail, Eye, EyeOff} from "lucide-react"
 import { Link } from 'react-router-dom'
+import AuthImagePattern from '../components/AuthImagePattern'
 
 const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -128,7 +129,7 @@ const SignUpPage = () => {
     </div>
 
     <AuthImagePattern
-      titel="Welcome to my platform"
+      title="Welcome to my World!"
       subtitle="Bawal dito KABIT for safety purposes hehe"
     />
 
