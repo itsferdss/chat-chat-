@@ -5,6 +5,8 @@ import { MessageSquare, User, Mail, Eye, EyeOff} from "lucide-react"
 import { Link } from 'react-router-dom'
 import AuthImagePattern from '../components/AuthImagePattern'
 
+import {toast} from 'react-toastify';
+
 const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ 
@@ -13,14 +15,26 @@ const SignUpPage = () => {
     password: "",
   });
 
-  const {signip, isSigningUp} = useAuthStore();
+  const {signup, isSigningUp} = useAuthStore();
 
   const validateForm = () => {
+
+    if(!formData.fullName.trim()) return toast.error("Full Name is required");
+    if(!formData.email.trim()) return toast.error("Email is required");
+    if(!/\S+@\S+\.\S+/.test(formData.email)) return toast.error("Email is invalid");
+    if(!formData.password.trim()) return toast.error("Password is required");
+    if(formData.password.length < 6) return toast.error("Password must be at least 6 characters long");
+
+    return true;
 
   }
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const success = validateForm()
+
+    if (success === true) signup(formData)
   }
 
   return (
@@ -39,7 +53,7 @@ const SignUpPage = () => {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form className="space-y-6">
         <div className="form-control">
           <label className="label">
               <span className="label-text font-medium">Full Name</span>
@@ -105,7 +119,7 @@ const SignUpPage = () => {
             </div>
           </div>
 
-          <button type = "button" className="btn btn-primary w-full" disabled={isSigningUp}>
+          <button onClick={handleSubmit} type = "button" className="btn btn-primary w-full" disabled={isSigningUp}>
             {isSigningUp ? (
               <>
               <Loader2 className="size-5 animate-spin" />
