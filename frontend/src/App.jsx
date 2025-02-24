@@ -6,14 +6,17 @@ import  SignUp  from "./pages/SignUpPage"
 import  LoginPage  from "./pages/LoginPage"
 import  SettingPage  from "./pages/SettingsPage"
 import { useAuthStore } from "./store/useAuthStore"
+import { useThemeStore } from "./store/useThemeStore"
 import { useEffect } from "react"
 
 import { Loader } from "lucide-react"
-import { Toaster } from "react-hot-toast";
+import { ToastContainer } from "react-toastify";
 
 function App() {
 
   const {authUser, checkAuth, isCheckingAuth} = useAuthStore()
+
+  const {theme} = useThemeStore()
 
   useEffect(() => {
     checkAuth()
@@ -28,11 +31,8 @@ function App() {
       </div>
     );
     
-
-  
-
   return (
-    <div>
+    <div data-theme={theme}>
       <Navbar />
       <Routes>
         <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login"/>}  />
@@ -42,7 +42,7 @@ function App() {
         <Route path="/settings" element={<SettingPage /> } />
       </Routes>
 
-      <Toaster />
+      <ToastContainer />
     </div>
   )
 }

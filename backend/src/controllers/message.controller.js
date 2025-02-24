@@ -1,17 +1,18 @@
-import User from "../model/message.model.js";
+import User from "../model/user.model.js";
 import Message from "../model/message.model.js";
 import cloudinary from "../lib/cloudinary.js";
 
-export const getUsersForSidebar = async (req, res ) => {
+export const getUsersForSidebar = async (req, res) => {
     try {
         const loggedInUserId = req.user._id;
-        const filteredUsers = await User.find({_id: {$ne: loggedInUserId}}). select("-password");
+        const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select("-password");
+
         res.status(200).json(filteredUsers);
     } catch (error) {
-        console.error(`Error: ${error.message}`);
-        res.status(500).json({ message: "Server Error" });
+        console.error("Error in getUsersForSidebar: ", error.message);
+        res.status(500).json({ error: "Internal server error" });
     }
-}
+};
 
 export const getMessages = async (req, res ) => {
     try {
@@ -38,7 +39,7 @@ export const sendMessage = async (req, res ) => {
         
         let imageUrl;
         if (image) {
-            const uploadResponse = await couldinary.uploader.upload(image);
+            const uploadResponse = await cloudinary.uploader.upload(image);
             imageUrl = uploadResponse.url;
         }
         const newMessage = new Message({
