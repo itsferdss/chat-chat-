@@ -33,12 +33,12 @@ export const getMessages = async (req, res ) => {
     }
 }
 
-export const sendMessage = async (req, res ) => {
+export const sendMessage = async (req, res) => {
     try {
         const { id: recieverId } = req.params;
         const { text, image } = req.body;
         const senderId = req.user._id;
-        
+
         let imageUrl;
         if (image) {
             const uploadResponse = await cloudinary.uploader.upload(image);
@@ -53,14 +53,19 @@ export const sendMessage = async (req, res ) => {
         await newMessage.save();
 
         const recieverSocketId = getRecieverSocketId(recieverId);
-        if(recieverSocketId) {
+        const senderSocketId = getRecieverSocketId(senderId); // Get sender's socket ID
+
+        if (recieverSocketId) {
             io.to(recieverSocketId).emit("newMessage", newMessage);
         }
 
+        if (senderSocketId) {
+            io.to(senderSocketId).emit("newMessage", newMessage); // Emit to sender as well
+        }
 
         res.status(200).json(newMessage);
     } catch (error) {
         console.error(`Error: ${error.message}`);
         res.status(500).json({ message: "Server Error" });
     }
-}
+};
