@@ -9,6 +9,7 @@ export const useChatStore = create ((set,get) => ({
     selectedUser: null,
     isUsersLoading: false,
     isMessagesLoading: false,
+    unseenMessagesCount: {},
 
 
     getUsers: async () => {
@@ -46,20 +47,51 @@ export const useChatStore = create ((set,get) => ({
         } 
     },
 
+    incrementUnseenCount: (senderId) => {
+        set((state) => {
+            const count = state.unseenMessagesCount[senderId] || 0;
+            return {
+                unseenMessagesCount: {
+                    ...state.unseenMessagesCount,
+                    [senderId]: count + 1
+                }
+            };
+        });
+    },
+
+    resetUnseenCount: (userId) => {
+        set((state) => {
+            const newCount = { ...state.unseenMessagesCount };
+            delete newCount[userId]; // Reset unseen count for selected user
+            return {
+                unseenMessagesCount: newCount
+            };
+        });
+    },
+
     subscribeToMessages: () => {
-        const { selectedUser } = get()
-        if(!selectedUser) return;
-
+        const { selectedUser } = get();
+        if (!selectedUser) return;
+    
+        const { userId } = useAuthStore.getState(); 
+        if (!userId) return;
+    
         const socket = useAuthStore.getState().socket;
-
+    
         socket.on("newMessage", (newMessage) => {
-            const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
+            if (!newMessage || !newMessage.senderId) return;
+    
+            const isMessageSentFromSelectedUser = newMessage.senderId.toString() === selectedUser._id.toString();
             if (!isMessageSentFromSelectedUser) return;
+    
+            if (newMessage.receiverId.toString() === userId.toString()) {
+                get().incrementUnseenCount(newMessage.senderId);
+            }
             
-            set({ 
-                messages: [...get().messages, newMessage] 
+            set({
+                messages: [...get().messages, newMessage]
             });
-        })
+        });
     },
 
     unsubscribeFromMessages: () => {
@@ -67,5 +99,9 @@ export const useChatStore = create ((set,get) => ({
         socket.off("newMessage");
     },
 
-    setSelectedUser: async (selectedUser) => set({ selectedUser }),
+    setSelectedUser: async (selectedUser) => {
+        set({ selectedUser });
+        // Reset unseen count when the user clicks to chat with another user
+        get().resetUnseenCount(selectedUser._id);
+    },
 }))
