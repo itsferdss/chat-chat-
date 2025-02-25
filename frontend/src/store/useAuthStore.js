@@ -108,7 +108,4 @@ export const useAuthStore = create((set, get) => ({
     disconnectSocket: () => {
         if(get().socket?.connected) get().socket.disconnect();
     },
-    addMessage: (newMessage) => set((state) => ({
-        messages: [...state.messages, newMessage],
-      })),
-    }));
+}))
